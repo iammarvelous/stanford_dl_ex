@@ -32,8 +32,7 @@ for i = 1:numHidden
             hAct{i} = sigmoid(hAct{i});
         case 'relu'
             hAct{i} = relu(hAct{i});
-        case 'tanh'
-            hAct{i} = tanh(hAct{i});
+        case 
        
     end
 end
@@ -69,10 +68,6 @@ for i = numHidden + 1:-1:1
         switch ei.activation_fun
             case 'logistic'
                 gradLayer = hAct{i} .* (1 - hAct{i});
-            case 'relu'
-                gradLayer = hAct{i} > 0;
-            case 'tanh'
-                gradLayer = 1 - hAct{i} .^ 2;
         end
     end
     gradZ = grad_prev .* gradLayer;

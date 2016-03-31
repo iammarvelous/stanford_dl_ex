@@ -30,7 +30,7 @@ ei.layer_sizes = [256, ei.output_dim];
 ei.lambda = 0;
 % which type of activation function to use in hidden layers
 % feel free to implement support for only the logistic sigmoid function
-ei.activation_fun = 'logistic';
+ei.activation_fun = 'tanh';
 
 %% setup random initial weights
 stack = initialize_weights(ei);
