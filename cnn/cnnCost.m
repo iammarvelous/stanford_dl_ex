@@ -73,9 +73,9 @@ activationsPooled = zeros(outputDim,outputDim,numFilters,numImages);
 
 %%% YOUR CODE HERE %%%
 
-activationType = 'relu';
+activationType = 'sigmoid';
 
-activations = cnnConvolve(filterDim, numFilters, images, Wc, bc);
+activations = cnnConvolve(filterDim, numFilters, images, Wc, bc, activationType);
 activationsPooled = cnnPool(poolDim, activations);
 
 % Reshape activations into 2-d matrix, hiddenSize x numImages,
@@ -107,15 +107,21 @@ cost = 0; % save objective into cost
 %%% YOUR CODE HERE %%%
 loss = log(probs);
 idx = sub2ind(size(loss), labels', 1:numImages);
-cost = -sum(loss(idx));% / numImages; % / numImages
+cost = -sum(loss(idx)) / numImages; 
 
-
-% Marvin Luo's experiments notes on NN:
-% It seems that when the cost is divided by numImages could cause a lot
+% Marvin Luo's experiments notes on NN and CNN:
+% * It seems that when the cost is divided by numImages could cause a lot
 % more evaluations in each iteration of gradient descent. However, the
 % evaluations become the same as before if the error in the output layer is
 % also divided by the numImages. What's more, it seems that this even
 % faster than not dividing numImages at all.
+% * Should divide numImages, or cost will be NaN.
+% * When using relu, gradient of bc is not correct. Don't know why yet.
+%
+%           Accuracy   Time
+% relu      
+% sigmoid   0.97100
+
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
@@ -139,9 +145,9 @@ end;
 
 ground_truth = zeros(size(probs));
 ground_truth(idx) = 1;
-gradZ = (probs - ground_truth); %/ numImages
+gradZ = (probs - ground_truth) / numImages; 
 
-Wd_grad = gradZ * activationsPooled';% / numImages;
+Wd_grad = gradZ * activationsPooled';
 bd_grad = sum(gradZ, 2);
 
 gradActPool = Wd' * gradZ;
@@ -164,37 +170,7 @@ for i = 1:numImages
 end
 bc_grad = sum(sum(sum(gradZc, 4)));
 Wc_grad = sum(Wc_grad_temp, 4);
-%for filterNum = 1:numFilters
-%    e = errorpooling(:,:,filterNum,:);
-%    bc_grad(filterNum) = sum(e(:)) / numImages;
-%end
 
-%errorpooled = Wd' * errorprev;
-%errorpooled = reshape(errorpooled, outputDim, outputDim, numFilters, numImages);
-
-%errorpooling = zeros(convDim, convDim, numFilters, numImages);
-%unpoolingFilter = ones(poolDim, poolDim) / (poolDim ^ 2);
-
-%parfor imgNum = 1:numImages
-%    for filterNum = 1:numFilters
-%        errorpooling(:,:, filterNum, imgNum) = kron(errorpooled(:,:, filterNum, imgNum), unpoolingFilter);
-%    end
-%end
-
-%switch activationType
-%    case 'relu'
-%        errorConv = errorpooling .* (activations > 0);
-%    case 'sigmoid'
-%        errorConv = errorpooling .* activations .* (1 - activations);
-%end
-        
-%for filterNum = 1:numFilters
-%    Wc_gradFilter = zeros(size(Wc_grad, 1), size(Wc_grad, 2));
-%    for imgNum = 1:numImages
-%        Wc_gradFilter = Wc_gradFilter + conv2(images(:,:,imgNum),rot90(errorConv(:,:, filterNum, imgNum),2),'valid');
-%    end
-%    Wc_grad(:,:,filterNum) = Wc_gradFilter / numImages;
-%end
 %%======================================================================
 %% STEP 1d: Gradient Calculation
 %  After backpropagating the errors above, we can use them to calculate the
@@ -204,11 +180,6 @@ Wc_grad = sum(Wc_grad_temp, 4);
 %  for that filter with each image and aggregate over images.
 
 %%% YOUR CODE HERE %%%
-
-
-
-
-
 
 %% Unroll gradient into grad vector for minFunc
 grad = [Wc_grad(:) ; Wd_grad(:) ; bc_grad(:) ; bd_grad(:)];

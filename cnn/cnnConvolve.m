@@ -1,4 +1,4 @@
-function convolvedFeatures = cnnConvolve(filterDim, numFilters, images, W, b)
+function convolvedFeatures = cnnConvolve(filterDim, numFilters, images, W, b, activationType)
 %cnnConvolve Returns the convolution of the features given by W and b with
 %the given images
 %
@@ -64,11 +64,13 @@ for imageNum = 1:numImages
     % Then, apply the sigmoid function to get the hidden activation
     
     %%% YOUR CODE HERE %%%
-    %convolvedImage = sigmoid(convolvedImage + b(filterNum));
-
-    % For ReLU nonlinearity
-     convolvedImage = max(0, convolvedImage + b(filterNum));
-    
+    switch activationType
+        case 'sigmoid'
+            convolvedImage = sigmoid(convolvedImage + b(filterNum));
+        case 'relu'
+        % For ReLU nonlinearity
+            convolvedImage = max(0, convolvedImage + b(filterNum));
+    end
     convolvedFeatures(:, :, filterNum, imageNum) = convolvedImage;
   end
 end
