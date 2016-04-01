@@ -64,10 +64,10 @@ for imageNum = 1:numImages
     % Then, apply the sigmoid function to get the hidden activation
     
     %%% YOUR CODE HERE %%%
-    convolvedImage = sigmoid(convolvedImage + b(filterNum));
+    %convolvedImage = sigmoid(convolvedImage + b(filterNum));
 
     % For ReLU nonlinearity
-    % convolvedImage = max(0, convolvedImage + b(filterNum));
+     convolvedImage = max(0, convolvedImage + b(filterNum));
     
     convolvedFeatures(:, :, filterNum, imageNum) = convolvedImage;
   end
